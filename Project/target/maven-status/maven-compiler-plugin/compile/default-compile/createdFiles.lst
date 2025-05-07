@@ -1,0 +1,12 @@
+search\SearchResult.class
+search\URLQueueInterface.class
+search\Gateway$BarrelMetrics.class
+search\IndexStorageBarrelInterface.class
+search\GoogolClient.class
+search\Sockets\ReliableMulticast.class
+search\Downloader.class
+search\Gateway.class
+search\GatewayInterface.class
+search\URLQueue.class
+search\Gateway$BarrelHealth.class
+search\IndexStorageBarrel.class

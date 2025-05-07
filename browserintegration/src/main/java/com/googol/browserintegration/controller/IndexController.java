@@ -1,0 +1,73 @@
+package com.googol.browserintegration.controller;
+
+import com.googol.browserintegration.service.IndexService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.*;
+import search.SearchResult;
+
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
+public class IndexController {
+
+    private final IndexService indexService;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    public IndexController(IndexService indexService, SimpMessagingTemplate messagingTemplate) {
+        this.indexService = indexService;
+        this.messagingTemplate = messagingTemplate;
+    }
+
+    @PostMapping("/index")
+    public ResponseEntity<?> indexUrl(@RequestBody Map<String, String> payload) {
+        try {
+            String url = payload.get("url");
+            indexService.addUrl(url);
+
+            // Notificação via WebSocket
+            messagingTemplate.convertAndSend("/topic/notifications",
+                    Map.of("type", "INDEXING", "url", url, "status", "QUEUED"));
+
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
+    @GetMapping("/web-search")
+    public ResponseEntity<?> webSearch(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page) throws RemoteException {
+
+        List<SearchResult> allResults = indexService.webSearch(q);
+
+        // Paginação (10 resultados por página)
+        int pageSize = 10;
+        int totalPages = (int) Math.ceil((double) allResults.size() / pageSize);
+        int start = page * pageSize;
+        int end = Math.min(start + pageSize, allResults.size());
+
+        List<SearchResult> paginatedResults = allResults.subList(start, end);
+
+        return ResponseEntity.ok(Map.of(
+                "results", paginatedResults,
+                "currentPage", page,
+                "totalPages", totalPages
+        ));
+    }
+
+
+    @GetMapping("/test-notification")
+    public void sendTestNotification() {
+        messagingTemplate.convertAndSend("/topic/notifications",
+                Map.of("message", "Teste de notificação", "type", "success")
+        );
+    }
+}
