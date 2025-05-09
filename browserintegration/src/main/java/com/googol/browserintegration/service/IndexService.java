@@ -23,4 +23,8 @@ public class IndexService {
     public List<SearchResult> webSearch(String q) throws RemoteException {
         return gateway.webSearch(q);
     }
+
+    public List<String> getBacklinks(String url) throws RemoteException {
+        return gateway.getBacklinks(url);
+    }
 }

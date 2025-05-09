@@ -527,6 +527,8 @@ public class Gateway extends UnicastRemoteObject implements GatewayInterface, Au
         try {
             // Perform the inbound links lookup on the selected barrel
             List<String> results = selectedBarrel.getInboundLinks(pageUrl);
+            // Debugging print statement
+            System.out.println("Inbound links for " + pageUrl + ": " + results);
             return results;
         } catch (RemoteException e) {
             logError(String.format("Error checking inbound links for '%s'. Attempting recovery...", pageUrl));
@@ -554,6 +556,11 @@ public class Gateway extends UnicastRemoteObject implements GatewayInterface, Au
         }
     }
 
+
+    @Override
+    public List<String> getBacklinks(String url) throws RemoteException {
+        return checkInboundLinks(url);
+    }
 
     /**
      * Retrieves the title of a webpage by fetching and parsing its HTML.

@@ -70,4 +70,27 @@ public class IndexController {
                 Map.of("message", "Teste de notificação", "type", "success")
         );
     }
+
+    @GetMapping("/backlinks")
+    public ResponseEntity<?> getBacklinks(
+            @RequestParam String url,
+            @RequestParam(defaultValue = "0") int page) throws RemoteException {
+
+        List<String> allBacklinks = indexService.getBacklinks(url);
+
+        // Paginação idêntica à pesquisa
+        int pageSize = 10;
+        int totalPages = (int) Math.ceil((double) allBacklinks.size() / pageSize);
+        int start = page * pageSize;
+        int end = Math.min(start + pageSize, allBacklinks.size());
+
+        List<String> paginatedResults = allBacklinks.subList(start, end);
+
+        return ResponseEntity.ok(Map.of(
+                "results", paginatedResults,
+                "currentPage", page,
+                "totalPages", totalPages,
+                "query", url // Mantemos o padrão de search
+        ));
+    }
 }

@@ -51,6 +51,8 @@ public interface GatewayInterface extends Remote {
     String getSystemState() throws RemoteException;
 
     List<SearchResult> webSearch(String word) throws RemoteException;
+
+    List<String> getBacklinks(String url) throws RemoteException;
 }
 
 
