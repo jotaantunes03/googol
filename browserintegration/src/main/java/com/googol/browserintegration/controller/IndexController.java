@@ -1,5 +1,6 @@
 package com.googol.browserintegration.controller;
 
+import com.googol.browserintegration.service.GeminiService;
 import com.googol.browserintegration.service.IndexService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +8,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import search.SearchResult;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +18,13 @@ import java.util.Map;
 public class IndexController {
 
     private final IndexService indexService;
+    private final GeminiService geminiService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
-    public IndexController(IndexService indexService, SimpMessagingTemplate messagingTemplate) {
+    public IndexController(IndexService indexService, GeminiService geminiService, SimpMessagingTemplate messagingTemplate) {
         this.indexService = indexService;
+        this.geminiService = geminiService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -56,10 +60,20 @@ public class IndexController {
 
         List<SearchResult> paginatedResults = allResults.subList(start, end);
 
+        // Obter explicação da IA para o termo de pesquisa
+        String aiExplanation = "";
+        try {
+            aiExplanation = geminiService.getAIExplanation(q);
+        } catch (IOException e) {
+            // Se houver falha na obtenção da explicação, apenas log e continua
+            System.err.println("Erro ao obter explicação da Gemini: " + e.getMessage());
+        }
+
         return ResponseEntity.ok(Map.of(
                 "results", paginatedResults,
                 "currentPage", page,
-                "totalPages", totalPages
+                "totalPages", totalPages,
+                "aiExplanation", aiExplanation
         ));
     }
 

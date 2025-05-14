@@ -571,10 +571,23 @@ public class Gateway extends UnicastRemoteObject implements GatewayInterface, Au
     public static String getTitle(String url) {
         try {
             Document doc = Jsoup.connect(url).get();
-            return doc.title() + "\n" + doc.select("p").first().text();
+            String title = doc.title();
+
+            // Safely get the first paragraph text with null checks
+            String paragraphText = "";
+            if (doc.select("p").first() != null) {
+                paragraphText = doc.select("p").first().text();
+            } else {
+                paragraphText = "No paragraph content available";
+            }
+
+            return title + "\n" + paragraphText;
         } catch (IOException e) {
             e.printStackTrace();
-            return "Failed to fetch title";
+            return "Failed to fetch title\nNo content available";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error processing page\nNo content available";
         }
     }
 

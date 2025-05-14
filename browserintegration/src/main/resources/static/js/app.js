@@ -93,6 +93,10 @@ class GoogolUI {
         const messages = document.querySelectorAll('.status-message');
         messages.forEach(msg => msg.remove());
 
+        // Remove a caixa de explicação da IA
+        const aiExplanation = document.querySelector('.ai-explanation-box');
+        if (aiExplanation) aiExplanation.remove();
+
         this.resultsContainer.innerHTML = '';
         this.resultsContainer.style.display = 'none';
         const pagination = document.querySelector('.pagination');
@@ -118,6 +122,9 @@ class GoogolUI {
         const messages = document.querySelectorAll('.status-message');
         messages.forEach(msg => msg.remove());
 
+        // Remove a caixa de explicação da IA
+        const aiExplanation = document.querySelector('.ai-explanation-box');
+        if (aiExplanation) aiExplanation.remove();
 
         this.resultsContainer.innerHTML = '';
         this.resultsContainer.style.display = 'none';
@@ -155,6 +162,10 @@ class GoogolUI {
         this.searchBar.classList.remove('success', 'error', 'transitioning');
         const messages = document.querySelectorAll('.status-message');
         messages.forEach(msg => msg.remove());
+
+        // Remove a caixa de explicação da IA
+        const aiExplanation = document.querySelector('.ai-explanation-box');
+        if (aiExplanation) aiExplanation.remove();
     }
 
     // Core Functionality
@@ -232,6 +243,9 @@ class GoogolUI {
                 throw new Error('Invalid response format');
             }
 
+            // Exibir explicação da IA antes dos resultados
+            this.displayAIExplanation(data.aiExplanation, query);
+
             this.displayResults(data.results);
             state.currentPage = data.currentPage;
             state.totalPages = data.totalPages;
@@ -302,7 +316,29 @@ class GoogolUI {
         resultsContainer.style.display = 'block';
     }
 
+    // Novo método para exibir a explicação da IA
+    displayAIExplanation(explanation, query) {
+        // Remove qualquer explicação anterior
+        const existingExplanation = document.querySelector('.ai-explanation-box');
+        if (existingExplanation) {
+            existingExplanation.remove();
+        }
 
+        // Se não há explicação, não exibe nada
+        if (!explanation || explanation.trim() === '') {
+            return;
+        }
+
+        const explanationBox = document.createElement('div');
+        explanationBox.className = 'ai-explanation-box';
+        explanationBox.innerHTML = `
+            <h3><i class="fas fa-robot"></i> Sobre "${query}"</h3>
+            <div class="ai-explanation-content">${explanation}</div>
+        `;
+
+        // Insere antes do container de resultados
+        this.resultsContainer.parentNode.insertBefore(explanationBox, this.resultsContainer);
+    }
 
     updatePagination(currentPage, totalPages) {
         const paginationDiv = document.querySelector('.pagination');
@@ -452,7 +488,11 @@ class GoogolUI {
             if (activeMode === 'backlinkModeBtn') {
                 this.displayBacklinks(data.results, data.query);
             } else {
-                this.displayResults(data.results); // Agora sem parâmetro isBacklink
+                // Para pesquisa, verificar se temos explicação da IA
+                if (data.aiExplanation) {
+                    this.displayAIExplanation(data.aiExplanation, query);
+                }
+                this.displayResults(data.results);
             }
 
             state.currentPage = data.currentPage;
@@ -460,7 +500,7 @@ class GoogolUI {
             this.updatePagination(state.currentPage, state.totalPages);
 
             window.scrollTo({
-                top: this.resultsContainer.offsetTop - 100,
+                top: document.querySelector('.ai-explanation-box')?.offsetTop || this.resultsContainer.offsetTop - 100,
                 behavior: 'smooth'
             });
 
