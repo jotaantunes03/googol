@@ -546,6 +546,55 @@ body {
 
 
 
+/* Toggle Switch */
+.hackernews-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.toggle-switch.active {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+}
+
+.slider {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    top: 1px;
+    background-color: #1a73e8;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.toggle-switch.active .slider {
+    transform: translateX(26px);
+    background-color: #fff;
+}
+
+.hackernews-toggle-container span {
+    font-size: 14px;
+    color: #5f6368;
+}
+
+
+
 
 
 

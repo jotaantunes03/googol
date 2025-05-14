@@ -15,7 +15,7 @@ import java.net.URL;
 @Service
 public class GeminiService {
 
-    @Value("${gemini.api.key:}")
+    @Value("${gemini.api.key:AIzaSyBnbdW3DCbka4leFSN4cm_M9J5B1YhfKiQ}")
     private String apiKey;
 
     @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}")

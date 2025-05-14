@@ -27,4 +27,8 @@ public class IndexService {
     public List<String> getBacklinks(String url) throws RemoteException {
         return gateway.getBacklinks(url);
     }
+
+    public void addUrlToQueue(String url) throws RemoteException {
+        gateway.addUrl(url);
+    }
 }

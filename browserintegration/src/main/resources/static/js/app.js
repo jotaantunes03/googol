@@ -31,6 +31,10 @@ class GoogolUI {
         this.searchActionBtn = document.getElementById('searchActionBtn');
         this.backlinkModeBtn = document.getElementById('backlinkModeBtn');
         this.backlinkBtn = document.getElementById('backlinkBtn');
+
+        this.hackernewsToggle = document.getElementById('hackernewsToggle');
+        this.hackernewsToggleContainer = document.querySelector('.hackernews-toggle-container');
+        this.isHackerNewsActive = false;
     }
 
     initializeWebSocket() {
@@ -58,7 +62,7 @@ class GoogolUI {
         this.searchActionBtn.addEventListener('click', () => this.performSearch());
         this.backlinkModeBtn.addEventListener('click', () => this.setBacklinkMode());
         this.backlinkBtn.addEventListener('click', () => this.handleBacklinks());
-
+        this.hackernewsToggle.addEventListener('click', () => this.toggleHackerNews());
     }
 
     handleKeyPress(e) {
@@ -89,6 +93,7 @@ class GoogolUI {
         this.backlinkBtn.style.display = "none";
         this.searchActionBtn.style.display = "block"; // Mostra o novo botão
 
+
         this.searchBar.classList.remove('success', 'error', 'transitioning');
         const messages = document.querySelectorAll('.status-message');
         messages.forEach(msg => msg.remove());
@@ -101,6 +106,22 @@ class GoogolUI {
         this.resultsContainer.style.display = 'none';
         const pagination = document.querySelector('.pagination');
         if (pagination) pagination.innerHTML = '';
+        this.hackernewsToggleContainer.style.display = 'flex';
+    }
+
+
+    toggleHackerNews() {
+        this.isHackerNewsActive = !this.isHackerNewsActive;
+        this.hackernewsToggle.classList.toggle('active');
+
+        const message = this.isHackerNewsActive
+            ? "Hacker News integration activated"
+            : "Hacker News integration deactivated";
+
+        this.showNotification(message, this.isHackerNewsActive ? 'success' : 'info');
+
+        // Armazenar estado (opcional)
+        localStorage.setItem('hackernewsToggle', this.isHackerNewsActive);
     }
 
     setIndexMode() {
@@ -130,6 +151,8 @@ class GoogolUI {
         this.resultsContainer.style.display = 'none';
         const pagination = document.querySelector('.pagination');
         if (pagination) pagination.innerHTML = '';
+        this.hackernewsToggleContainer.style.display = 'none';
+
     }
 
     setBacklinkMode() {
@@ -166,6 +189,8 @@ class GoogolUI {
         // Remove a caixa de explicação da IA
         const aiExplanation = document.querySelector('.ai-explanation-box');
         if (aiExplanation) aiExplanation.remove();
+        this.hackernewsToggleContainer.style.display = 'none';
+
     }
 
     // Core Functionality
@@ -227,7 +252,7 @@ class GoogolUI {
 
         try {
             const state = this.paginationState.search;
-            const response = await fetch(`/api/web-search?q=${encodeURIComponent(query)}&page=${state.currentPage}`);
+            const response = await fetch(`/api/web-search?q=${encodeURIComponent(query)}&page=${state.currentPage}&hn=${this.isHackerNewsActive}`);
 
             // Verificação adicional do status HTTP
             if (!response.ok) {

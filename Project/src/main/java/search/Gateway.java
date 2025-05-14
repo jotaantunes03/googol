@@ -488,6 +488,7 @@ public class Gateway extends UnicastRemoteObject implements GatewayInterface, Au
         try {
             urlQueue.addUrl(url);
             logInfo(String.format("URL added to queue: %s", url));
+            System.out.println("Url adicionado:" + url + "\n");
         } catch (RemoteException e) {
             logError(String.format("Error adding URL to queue: %s. Attempting reconnection...", url));
             urlQueue = null;

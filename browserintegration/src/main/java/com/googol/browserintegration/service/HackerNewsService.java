@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.stereotype.Service;
 
+@Service
 public class HackerNewsService {
     private static final int MAX_STORIES = 20;
 

@@ -1,6 +1,7 @@
 package com.googol.browserintegration.controller;
 
 import com.googol.browserintegration.service.GeminiService;
+import com.googol.browserintegration.service.HackerNewsService;
 import com.googol.browserintegration.service.IndexService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +21,14 @@ public class IndexController {
     private final IndexService indexService;
     private final GeminiService geminiService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final HackerNewsService hackerNewsService;
 
     @Autowired
-    public IndexController(IndexService indexService, GeminiService geminiService, SimpMessagingTemplate messagingTemplate) {
+    public IndexController(IndexService indexService, GeminiService geminiService, SimpMessagingTemplate messagingTemplate, HackerNewsService hackerNewsService) {
         this.indexService = indexService;
         this.geminiService = geminiService;
         this.messagingTemplate = messagingTemplate;
+        this.hackerNewsService = hackerNewsService;
     }
 
     @PostMapping("/index")
@@ -48,9 +51,22 @@ public class IndexController {
     @GetMapping("/web-search")
     public ResponseEntity<?> webSearch(
             @RequestParam String q,
-            @RequestParam(defaultValue = "0") int page) throws RemoteException {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "false") boolean hn) throws RemoteException {
 
         List<SearchResult> allResults = indexService.webSearch(q);
+
+        // Se o toggle Hacker News estiver ativo, adiciona URLs ao índice
+        if (hn) {
+            List<String> hackerNewsUrls = hackerNewsService.getUrlsToIndex(List.of(q));
+            for (String url : hackerNewsUrls) {
+                try {
+                    indexService.addUrlToQueue(url);
+                } catch (RemoteException e) {
+                    throw new RuntimeException("Falha ao enfileirar URL do Hacker News", e);
+                }
+            }
+        }
 
         // Paginação (10 resultados por página)
         int pageSize = 10;
