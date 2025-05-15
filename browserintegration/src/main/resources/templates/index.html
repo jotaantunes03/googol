@@ -1,39 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Basic meta tags for character encoding and responsive viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta description for SEO -->
     <meta name="description" content="Googol - Distributed Web Search Engine">
+    <!-- Page title displayed in browser tab -->
     <title>Googol - Web Search Engine</title>
 
-    <!-- Fonts -->
+    <!-- Google Fonts preconnect for performance optimization -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Empty favicon to prevent 404 errors -->
+    <link rel="icon" href="data:,">
+    <!-- Loading Roboto font for consistent typography -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Font Awesome -->
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- CSS -->
+    <!-- Custom CSS stylesheets -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
+<!-- Notification area for displaying alerts/messages to users -->
 <div id="notification-area" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
 <body>
-<!-- Header -->
+<!-- Header section with navigation and authentication buttons -->
 <header class="header">
+    <!-- Navigation links -->
     <nav class="nav-links">
         <a href="#">About</a>
         <a href="#">Images</a>
         <a href="#">Settings</a>
     </nav>
+    <!-- Authentication buttons -->
     <div class="auth-buttons">
         <button class="btn btn-outline">Sign in</button>
         <button class="btn btn-primary">Register</button>
     </div>
 </header>
 
-<!-- Main Content -->
+<!-- Main Content section -->
 <main class="main-content">
+    <!-- Logo with multi-colored styling similar to Google -->
     <div class="logo">
         <h1 class="logo-text">
             <span class="googol-blue">G</span>
@@ -45,31 +55,32 @@
         </h1>
     </div>
 
-    <!-- Search mode toggle -->
+    <!-- Toggle buttons to switch between search modes -->
     <div class="search-mode-toggle">
         <button class="mode-btn active" id="searchModeBtn">Search</button>
         <button class="mode-btn" id="indexModeBtn">Index URL</button>
         <button class="mode-btn" id="backlinkModeBtn">Backlinks</button>
     </div>
 
-    <!-- Search container -->
+    <!-- Search input container -->
     <div class="search-container">
         <label for="searchInput"></label><input type="text" class="search-bar" placeholder="Search the web with Googol" id="searchInput">
         <i class="fas fa-search search-icon" id="searchBarIcon"></i>
     </div>
 
-
-
-    <!-- Action buttons -->
+    <!-- Action buttons for different search modes -->
     <div class="action-buttons">
+        <!-- Default search buttons -->
         <button class="action-btn" id="searchBtn">Googol Search</button>
         <button class="action-btn" id="luckyBtn">I'm Feeling Lucky</button>
+        <!-- Index mode button (hidden by default) -->
         <button class="action-btn index-btn" id="indexBtn" style="display: none;">Index This URL</button>
         <button class="action-btn" id="searchActionBtn" style="display: none;">Search words</button>
+        <!-- Backlink mode button (hidden by default) -->
         <button class="action-btn backlink-btn" id="backlinkBtn" style="display: none;">Find Backlinks</button>
     </div>
 
-
+    <!-- Toggle switch for Hacker News results inclusion -->
     <div class="hackernews-toggle-container">
         <div class="toggle-switch" id="hackernewsToggle">
             <div class="slider"></div>
@@ -77,8 +88,9 @@
         <span>Include Hacker News Results</span>
     </div>
 
-    <!-- Results section -->
+    <!-- Container for search results -->
     <div class="results-container" id="resultsContainer">
+        <!-- Example search result item (template) -->
         <div class="result-item">
             <a href="#" class="result-title">Example Search Result Title</a>
             <span class="result-url">https://example.com/path/to/page</span>
@@ -90,45 +102,54 @@
         </div>
     </div>
 
-
-
-
-    <!-- Pagination -->
+    <!-- Pagination controls for navigating through multiple result pages -->
     <div class="pagination">
     </div>
 
-
-
-    <!-- Stats section -->
+    <!-- System statistics display section -->
     <div class="stats-container">
         <div class="stats-header">
             <h3 class="stats-title"><i class="fas fa-chart-line"></i> System Statistics</h3>
             <small>Last updated: <span id="lastUpdated">just now</span></small>
         </div>
+
         <div class="stats-grid">
+            <!-- Card showing active barrels and index size -->
             <div class="stat-card">
-                <div class="stat-value" id="activeBarrels">3</div>
-                <div class="stat-label">Active Barrels</div>
+                <div class="stat-label">Active Barrels & Index Size</div>
+                <ul id="barrelsList" class="stat-list"></ul>
             </div>
+
+            <!-- Card showing response times by barrel -->
             <div class="stat-card">
-                <div class="stat-value" id="indexSize">42.7M</div>
-                <div class="stat-label">Pages Indexed</div>
+                <div class="stat-label">Avg Response Time (ms)</div>
+                <ul id="responseTimeList" class="stat-list"></ul>
+            </div>
+
+            <!-- Wide card showing most popular searches -->
+            <div class="stat-card wide">
+                <div class="stat-label">Top 10 Searches</div>
+                <ul id="topSearchesList" class="stat-list"></ul>
             </div>
         </div>
     </div>
+
 </main>
 
-<!-- Footer -->
+<!-- Footer section with project details -->
 <footer class="footer">
     <p>Googol - Distributed Web Search Engine | Systems Design Project 2024/25</p>
     <p>João Antunes | Gabriel Pinto | David Cameijo</p>
 </footer>
 
-<!-- WebSocket Libraries -->
+<!-- WebSocket Libraries for real-time updates -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<!-- Duplicate SockJS library (might be redundant) -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundled/stomp.umd.min.js"></script>
 
-<!-- Main JS -->
+<!-- Main JavaScript file that handles all interactions -->
 <script src="js/app.js"></script>
 </body>
 </html>

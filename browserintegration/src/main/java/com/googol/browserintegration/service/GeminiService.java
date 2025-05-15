@@ -12,6 +12,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * Service for interacting with Google's Gemini AI API.
+ * This service handles requests to the Gemini API to provide AI-generated explanations
+ * for search queries.
+ */
 @Service
 public class GeminiService {
 
@@ -24,9 +29,14 @@ public class GeminiService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Consulta a API Gemini para obter explicação sobre a pesquisa
+     * Queries the Gemini API to get an explanation about a search term.
+     *
+     * @param searchQuery The search term to explain
+     * @return A brief explanation of the search term provided by Gemini AI
+     * @throws IOException If there is an error in the HTTP connection or JSON processing
      */
     public String getAIExplanation(String searchQuery) throws IOException {
+        // Construct the full API URL with the API key
         String apiUrl = apiBaseUrl + "?key=" + apiKey;
 
         URL url = new URL(apiUrl);
@@ -35,7 +45,7 @@ public class GeminiService {
         con.setRequestProperty("Content-Type", "application/json");
         con.setDoOutput(true);
 
-        // Construir um prompt melhorado para a Gemini
+        // Construct an enhanced prompt for Gemini that asks for a concise explanation
         String prompt = String.format(
                 "O usuário pesquisou por '%s'. Por favor, forneça uma breve explicação sobre este tema, " +
                         "destacando os principais aspectos e informações que seriam úteis para entender melhor este assunto. " +
@@ -43,24 +53,26 @@ public class GeminiService {
                 searchQuery
         );
 
+        // Create the JSON payload with the prompt
         String jsonInputString = String.format("""
         {
           "contents": [{
             "parts": [{"text": "%s"}]
           }]
         }
-        """, prompt.replace("\"", "\\\""));  // Escapando aspas para evitar problemas no JSON
+        """, prompt.replace("\"", "\\\""));  // Escape quotes to avoid JSON formatting issues
 
+        // Send the request body
         try (OutputStream os = con.getOutputStream()) {
             byte[] input = jsonInputString.getBytes("utf-8");
             os.write(input, 0, input.length);
         }
 
-        // Processar resposta
+        // Process the API response
         StringBuilder response = new StringBuilder();
         int responseCode = con.getResponseCode();
 
-        // Usar o stream correto com base no código de resposta
+        // Use the appropriate stream based on the response code
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(
                         responseCode >= 400 ? con.getErrorStream() : con.getInputStream(),
@@ -71,25 +83,28 @@ public class GeminiService {
             }
         }
 
-        // Verificar se a resposta foi bem-sucedida
+        // Check if the response was successful
         if (responseCode >= 400) {
             System.err.println("Erro ao consultar Gemini API: " + response.toString());
             return "Não foi possível obter uma explicação para este termo.";
         }
 
-        // Extrair o texto da resposta JSON do Gemini usando um parser JSON adequado
+        // Extract the text from Gemini's JSON response
         return extractTextFromGeminiResponse(response.toString());
     }
 
     /**
-     * Extrai o texto da resposta JSON retornada pela API Gemini usando Jackson
+     * Extracts the text content from the Gemini API JSON response.
+     *
+     * @param jsonResponse The JSON response from the Gemini API
+     * @return The extracted text explanation or an error message if extraction fails
      */
     private String extractTextFromGeminiResponse(String jsonResponse) {
         try {
-            // Usar Jackson para processar o JSON corretamente
+            // Use Jackson to properly parse the JSON
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
 
-            // Navegando na estrutura JSON conforme documentação da API Gemini
+            // Navigate through the JSON structure according to Gemini API documentation
             if (rootNode.has("candidates") && rootNode.get("candidates").isArray() &&
                     rootNode.get("candidates").size() > 0) {
 
@@ -106,7 +121,7 @@ public class GeminiService {
                 }
             }
 
-            // Fallback para caso a estrutura seja diferente
+            // Fallback in case the structure is different
             return findTextInJsonNode(rootNode);
 
         } catch (Exception e) {
@@ -117,14 +132,19 @@ public class GeminiService {
     }
 
     /**
-     * Método de fallback que procura recursivamente por um campo "text" no JSON
+     * Recursively searches for a "text" field in a JSON node structure.
+     * This is a fallback method to handle potential variations in the Gemini API response format.
+     *
+     * @param node The JSON node to search in
+     * @return The found text or an empty string if no text field is found
      */
     private String findTextInJsonNode(JsonNode node) {
+        // Check if the current node has a "text" field
         if (node.has("text")) {
             return node.get("text").asText();
         }
 
-        // Procurar em campos de objeto
+        // Recursively search in object fields
         for (String fieldName : (Iterable<String>) node::fieldNames) {
             JsonNode fieldValue = node.get(fieldName);
             if (fieldValue.isObject() || fieldValue.isArray()) {
@@ -135,7 +155,7 @@ public class GeminiService {
             }
         }
 
-        // Procurar em arrays
+        // Recursively search in arrays
         if (node.isArray()) {
             for (JsonNode element : node) {
                 String result = findTextInJsonNode(element);
